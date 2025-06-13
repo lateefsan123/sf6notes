@@ -297,20 +297,61 @@ border-top: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
 }
 
-.delete-notes {
-  align-self: flex-end;
-  background-color: #ff4d4f;
-  border: none;
-  color: white;
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: background 0.2s ease;
+.book {
+  position: relative;
 }
 
-.delete-notes:hover {
-  background-color: #e03b3d;
+.delete-book {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+.modal-actions button {
+  margin: 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.modal-actions button:first-child {
+  background: #ef4444;
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background: #e5e7eb;
+  color: #111;
 }

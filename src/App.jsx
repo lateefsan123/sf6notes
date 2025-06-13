@@ -1,3 +1,4 @@
+// 📁 App.jsx
 import React, { useState, useEffect } from 'react';
 import Bookshelf from './bookshelf';
 
@@ -11,10 +12,8 @@ export default function App() {
   });
   const [newMatchup, setNewMatchup] = useState('');
   const [showModal, setShowModal] = useState(false);
-
-  const books = []; // Your default character books should be defined here or passed to Bookshelf
   const [newImageFile, setNewImageFile] = useState(null);
-
+  const [bookToDelete, setBookToDelete] = useState(null);
 
   useEffect(() => {
     if (selectedBook) {
@@ -34,44 +33,61 @@ export default function App() {
   }, [customBooks]);
 
   const getRandomColor = () => {
-  const colors = [
-    '#f59e0b', '#10b981', '#3b82f6', '#ef4444',
-    '#8b5cf6', '#f43f5e', '#22c55e', '#0ea5e9',
-    '#eab308', '#ec4899', '#6366f1', '#f97316'
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-};
-
-const addMatchupBook = () => {
-  if (!newMatchup.trim()) return;
-
-  const title = newMatchup.trim();
-  const reader = new FileReader();
-
-  reader.onloadend = () => {
-    const newBook = {
-      title,
-      image: reader.result || null,
-      color: getRandomColor(),
-    };
-
-    setCustomBooks(prev => [...prev, newBook]);
-    setNewMatchup('');
-    setNewImageFile(null);
-    setShowModal(false);
+    const colors = [
+      '#f59e0b', '#10b981', '#3b82f6', '#ef4444',
+      '#8b5cf6', '#f43f5e', '#22c55e', '#0ea5e9',
+      '#eab308', '#ec4899', '#6366f1', '#f97316'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  if (newImageFile) {
-    reader.readAsDataURL(newImageFile);
-  } else {
-    reader.onloadend(); // handle empty image
-  }
-};
+  const addMatchupBook = () => {
+    if (!newMatchup.trim()) return;
 
+    const title = newMatchup.trim();
+    const reader = new FileReader();
 
+    reader.onloadend = () => {
+      const newBook = {
+        title,
+        image: reader.result || null,
+        color: getRandomColor(),
+      };
 
+      setCustomBooks(prev => [...prev, newBook]);
+      setNewMatchup('');
+      setNewImageFile(null);
+      setShowModal(false);
+    };
 
-  const currentBooks = view === 'characters' ? books : customBooks;
+    if (newImageFile) {
+      reader.readAsDataURL(newImageFile);
+    } else {
+      reader.onloadend();
+    }
+  };
+
+  const confirmDeleteBook = () => {
+    if (bookToDelete) {
+      setCustomBooks(prev => prev.filter(book => book.title !== bookToDelete.title));
+      if (selectedBook?.title === bookToDelete.title) {
+        setSelectedBook(null);
+      }
+    }
+    setBookToDelete(null);
+  };
+
+  const cancelDeleteBook = () => {
+    setBookToDelete(null);
+  };
+
+  const currentBooks =
+    view === 'characters'
+      ? []
+      : customBooks.map((book, i) => ({
+          ...book,
+          onDelete: () => setBookToDelete(book)
+        }));
 
   return (
     <div className="app">
@@ -106,6 +122,18 @@ const addMatchupBook = () => {
         </div>
       )}
 
+      {bookToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <p>Are you sure you want to delete <strong>{bookToDelete.title}</strong>?</p>
+            <div className="modal-actions">
+              <button onClick={confirmDeleteBook}>Yes, delete</button>
+              <button onClick={cancelDeleteBook}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="main-layout">
         <Bookshelf books={currentBooks} onSelectBook={setSelectedBook} />
 
@@ -122,18 +150,16 @@ const addMatchupBook = () => {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
-            
           </div>
-
         )}
 
         <div className="change-char-wrapper">
-              <a href="https://www.fightercenter.net">
-              <button className="change-char">
-                Change Character
-              </button>
-              </a>
-            </div>
+          <a href="https://www.fightercenter.net">
+            <button className="change-char">
+              Change Character
+            </button>
+          </a>
+        </div>
       </div>
     </div>
   );

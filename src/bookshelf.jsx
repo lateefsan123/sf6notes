@@ -28,7 +28,7 @@ import zangief from './covers/zangief.png';
 import improve from './covers/self-improvement-icon-sm.png';
 
 const defaultBooks = [
-    { title: 'Self improve', image: improve, color: '#3b82f6' },
+  { title: 'Self improve', image: improve, color: '#3b82f6' },
   { title: 'Aki Notes', image: aki, color: '#3b82f6' },
   { title: 'Akuma Notes', image: akuma, color: '#10b981' },
   { title: 'Blanka Notes', image: blanka, color: '#f59e0b' },
@@ -100,7 +100,7 @@ export default function Bookshelf({ books, onSelectBook }) {
                 className={`book ${rotationClass}`}
                 key={index}
                 onClick={() => onSelectBook({ ...book, color })}
-                style={{ backgroundColor: color }}
+                style={{ backgroundColor: color, position: 'relative' }}
               >
                 <div
                   className="book-image"
@@ -111,6 +111,18 @@ export default function Bookshelf({ books, onSelectBook }) {
                   )}
                 </div>
                 <p>{book.title}</p>
+
+                {book.onDelete && (
+                  <button
+                    className="delete-book"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      book.onDelete();
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             );
           })}
