@@ -72,6 +72,20 @@ function getRandomRotation() {
   return angles[Math.floor(Math.random() * angles.length)];
 }
 
+function darkenColor(hex, percent) {
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) - 255 * percent;
+  let g = ((num >> 8) & 0x00FF) - 255 * percent;
+  let b = (num & 0x0000FF) - 255 * percent;
+
+  r = Math.max(0, Math.min(255, r));
+  g = Math.max(0, Math.min(255, g));
+  b = Math.max(0, Math.min(255, b));
+
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+
 const ROW_SIZE = 7;
 
 export default function Bookshelf({ onSelectBook }) {
@@ -97,17 +111,20 @@ export default function Bookshelf({ onSelectBook }) {
 
             return (
               <div
-                className="book"
-                key={index}
-                onClick={() => onSelectBook(book)}
-                style={{
-                  backgroundColor: bgColor,
-                  '--rotate-angle': `${rotation}deg`
-                }}
-              >
-                <img src={book.image} alt={book.title} />
-                <p>{book.title}</p>
-              </div>
+  className="book"
+  key={index}
+  onClick={() => onSelectBook({ ...book, color: bgColor })}
+  style={{ backgroundColor: bgColor, '--rotate-angle': `${rotation}deg` }}
+>
+  <div
+    className="book-image"
+    style={{ backgroundColor: darkenColor(bgColor, 0.15) }}
+  >
+    <img src={book.image} alt={book.title} />
+  </div>
+  <p>{book.title}</p>
+</div>
+
             );
           })}
         </div>
