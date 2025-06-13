@@ -13,6 +13,8 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
 
   const books = []; // Your default character books should be defined here or passed to Bookshelf
+  const [newImageFile, setNewImageFile] = useState(null);
+
 
   useEffect(() => {
     if (selectedBook) {
@@ -42,18 +44,32 @@ export default function App() {
 
 const addMatchupBook = () => {
   if (!newMatchup.trim()) return;
+
   const title = newMatchup.trim();
-  if (!customBooks.find(b => b.title === title)) {
+  const reader = new FileReader();
+
+  reader.onloadend = () => {
     const newBook = {
       title,
-      image: null,
-      color: getRandomColor()
+      image: reader.result || null,
+      color: getRandomColor(),
     };
-    setCustomBooks([...customBooks, newBook]);
+
+    setCustomBooks(prev => [...prev, newBook]);
+    setNewMatchup('');
+    setNewImageFile(null);
+    setShowModal(false);
+  };
+
+  if (newImageFile) {
+    reader.readAsDataURL(newImageFile);
+  } else {
+    reader.onloadend(); // handle empty image
   }
-  setNewMatchup('');
-  setShowModal(false);
 };
+
+
+
 
   const currentBooks = view === 'characters' ? books : customBooks;
 
@@ -72,10 +88,16 @@ const addMatchupBook = () => {
           <div className="modal-content">
             <input
               type="text"
-              placeholder="New matchup (e.g. John's Ken)"
+              placeholder="(e.g. Lateef's kim)"
               value={newMatchup}
               onChange={e => setNewMatchup(e.target.value)}
             />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => setNewImageFile(e.target.files?.[0])}
+            />
+
             <div className="modal-actions">
               <button onClick={addMatchupBook}>Add</button>
               <button onClick={() => setShowModal(false)}>Cancel</button>
