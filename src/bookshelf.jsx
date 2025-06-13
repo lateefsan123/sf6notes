@@ -25,8 +25,10 @@ import rashid from './covers/rashid.png';
 import ryu from './covers/ryu.png';
 import terry from './covers/terry.png';
 import zangief from './covers/zangief.png';
+import improve from './covers/self-improvement-icon-sm.png';
 
 const defaultBooks = [
+    { title: 'Self improve', image: improve, color: '#3b82f6' },
   { title: 'Aki Notes', image: aki, color: '#3b82f6' },
   { title: 'Akuma Notes', image: akuma, color: '#10b981' },
   { title: 'Blanka Notes', image: blanka, color: '#f59e0b' },
