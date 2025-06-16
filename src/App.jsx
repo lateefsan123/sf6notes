@@ -3,21 +3,31 @@ import Bookshelf from './bookshelf';
 import html2pdf from 'html2pdf.js';
 
 export default function App() {
+  // what section we're on (character notes or matchup notes)
   const [view, setView] = useState('characters');
+
+  // which book is open right now
   const [selectedBook, setSelectedBook] = useState(null);
+
+  // custom matchup books, grab from localStorage if it's already there
   const [customBooks, setCustomBooks] = useState(() => {
     const saved = localStorage.getItem('matchup-books');
     return saved ? JSON.parse(saved) : [];
   });
 
+  // input field stuff for adding new matchups
   const [newMatchup, setNewMatchup] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [newImageFile, setNewImageFile] = useState(null);
   const [bookToDelete, setBookToDelete] = useState(null);
+
+  // default text color for notes
   const [textColor, setTextColor] = useState('#e4e4e7');
 
+  // to access the note area directly (for contentEditable)
   const notesRef = useRef(null);
 
+  // when a book is selected, load its saved notes from localStorage
   useEffect(() => {
     if (selectedBook && notesRef.current) {
       const saved = localStorage.getItem(`notes-${selectedBook.title}`);
@@ -25,6 +35,12 @@ export default function App() {
     }
   }, [selectedBook]);
 
+  // this makes sure the custom matchup books actually get saved
+  useEffect(() => {
+    localStorage.setItem('matchup-books', JSON.stringify(customBooks));
+  }, [customBooks]);
+
+  // whenever we type in the note box, save it to localStorage
   useEffect(() => {
     const handleInput = () => {
       if (selectedBook && notesRef.current) {
@@ -40,6 +56,7 @@ export default function App() {
     };
   }, [selectedBook]);
 
+  // handles coloring each letter you type with the selected color
   const handleRichTyping = (e) => {
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
@@ -58,6 +75,7 @@ export default function App() {
         notesRef.current.dispatchEvent(new Event('input', { bubbles: true }));
       }
     } else if (e.key === "Enter") {
+      // just handle enter key to make a line break manually
       e.preventDefault();
       const br = document.createElement("br");
       const range = window.getSelection().getRangeAt(0);
@@ -71,6 +89,7 @@ export default function App() {
     }
   };
 
+  // lets you save notes as a downloadable PDF
   const exportToPDF = () => {
     if (notesRef.current && selectedBook) {
       const opt = {
@@ -84,62 +103,67 @@ export default function App() {
     }
   };
 
-const presetColors = [
-  'rgb(59, 130, 246)',   // blue
-  'rgb(16, 185, 129)',   // green
-  'rgb(245, 158, 11)',   // orange
-  'rgb(239, 68, 68)',    // red
-  'rgb(139, 92, 246)',   // violet
-  'rgb(236, 72, 153)',   // pink
-  'rgb(34, 211, 238)',   // cyan
-  'rgb(249, 115, 22)',   // orange deep
-  'rgb(20, 184, 166)',   // teal
-  'rgb(132, 204, 22)',   // lime
-  'rgb(168, 85, 247)',   // purple
-  'rgb(244, 114, 182)',  // rose
-];
+  // some preset colors for new matchup books to randomly use
+  const presetColors = [
+    'rgb(59, 130, 246)',   // blue
+    'rgb(16, 185, 129)',   // green
+    'rgb(245, 158, 11)',   // orange
+    'rgb(239, 68, 68)',    // red
+    'rgb(139, 92, 246)',   // violet
+    'rgb(236, 72, 153)',   // pink
+    'rgb(34, 211, 238)',   // cyan
+    'rgb(249, 115, 22)',   // orange deep
+    'rgb(20, 184, 166)',   // teal
+    'rgb(132, 204, 22)',   // lime
+    'rgb(168, 85, 247)',   // purple
+    'rgb(244, 114, 182)',  // rose
+  ];
 
-const getRandomColor = () => {
-  return presetColors[Math.floor(Math.random() * presetColors.length)];
-};
+  const getRandomColor = () => {
+    return presetColors[Math.floor(Math.random() * presetColors.length)];
+  };
 
-
+  // adds a new matchup book
   const addMatchupBook = () => {
     if (!newMatchup.trim()) return;
     const title = newMatchup.trim();
     const reader = new FileReader();
 
+    // once image is loaded (or skipped), create the new book object
     reader.onloadend = () => {
       const newBook = {
         title,
         image: reader.result || null,
         color: getRandomColor(),
       };
-      setCustomBooks(prev => [...prev, newBook]);
+      setCustomBooks(prev => [...prev, newBook]); // add it to the array
       setNewMatchup('');
       setNewImageFile(null);
       setShowModal(false);
     };
 
     if (newImageFile) {
-      reader.readAsDataURL(newImageFile);
+      reader.readAsDataURL(newImageFile); // load the image
     } else {
-      reader.onloadend();
+      reader.onloadend(); // just call it with no image
     }
   };
 
+  // deletes a book
   const confirmDeleteBook = () => {
     if (bookToDelete) {
       setCustomBooks(prev => prev.filter(book => book.title !== bookToDelete.title));
       if (selectedBook?.title === bookToDelete.title) {
-        setSelectedBook(null);
+        setSelectedBook(null); // close it if it was open
       }
     }
     setBookToDelete(null);
   };
 
+  // just cancel deletion
   const cancelDeleteBook = () => setBookToDelete(null);
 
+  // picks which set of books to show based on view
   const currentBooks =
     view === 'characters'
       ? []
@@ -150,6 +174,7 @@ const getRandomColor = () => {
 
   return (
     <div className="app">
+      {/* top buttons to switch views */}
       <div className="tab-toggle">
         <button onClick={() => setView('characters')} className={view === 'characters' ? 'active' : ''}>Character Notes</button>
         <button onClick={() => setView('matchups')} className={view === 'matchups' ? 'active' : ''}>Player matchup</button>
@@ -158,6 +183,7 @@ const getRandomColor = () => {
         )}
       </div>
 
+      {/* popup to add a matchup book */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -180,6 +206,7 @@ const getRandomColor = () => {
         </div>
       )}
 
+      {/* delete confirmation popup */}
       {bookToDelete && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -193,17 +220,20 @@ const getRandomColor = () => {
       )}
 
       <div className="main-layout">
+        {/* bookshelf grid */}
         <Bookshelf
           books={currentBooks}
           onSelectBook={setSelectedBook}
           selectedBook={selectedBook}
         />
 
+        {/* notes section */}
         {selectedBook && (
           <div className="notes-panel">
             <div className="notes-header">
               <h2>{selectedBook.title}</h2>
               <div className="color-buttons">
+                {/* change text color buttons */}
                 <button onClick={() => setTextColor('#22d3ee')} style={{ background: '#22d3ee' }}>Cyan</button>
                 <button onClick={() => setTextColor('#f97316')} style={{ background: '#f97316' }}>Orange</button>
                 <button onClick={() => setTextColor('#84cc16')} style={{ background: '#84cc16' }}>Lime</button>
@@ -211,6 +241,7 @@ const getRandomColor = () => {
                 <button onClick={() => setTextColor('#ec4899')} style={{ background: '#ec4899' }}>Pink</button>
                 <button onClick={() => setTextColor('#e4e4e7')} style={{ background: '#e4e4e7', color: '#111' }}>White</button>
               </div>
+              {/* optional image of book */}
               {selectedBook.image && (
                 <img src={selectedBook.image} alt={selectedBook.title} className="character-thumb" />
               )}
@@ -229,6 +260,7 @@ const getRandomColor = () => {
           </div>
         )}
 
+        {/* button to go back to the main site */}
         <div className="change-char-wrapper">
           <a href="https://www.fightercenter.net">
             <button className="change-char">
