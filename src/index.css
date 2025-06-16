@@ -367,3 +367,94 @@ border-top: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
   border-radius: 6px;
 }
+
+
+.rich-notes {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  min-height: 450px;
+  background-color: rgba(28, 26, 45, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #f3f4f6;
+  font-size: 1rem;
+  line-height: 1.75;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  overflow-y: auto;
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+  transition: border 0.2s ease, background-color 0.3s ease;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.rich-notes:focus {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(30, 28, 48, 0.8);
+}
+
+.color-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.color-buttons button {
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  filter: brightness(1);
+}
+
+.color-buttons button:hover {
+  transform: scale(1.05);
+  filter: brightness(1.15);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+}
+
+.export-button {
+  margin-top: 16px;
+}
+
+.rich-notes {
+  caret-color: #ffffff;
+}
+
+.export-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+.export-button button {
+  background: #2f2f3a;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-button button:hover {
+  background: #3e3e50;
+  transform: scale(1.03);
+}
+
+.rich-notes::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rich-notes::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}

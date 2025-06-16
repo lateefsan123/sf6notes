@@ -1,56 +1,89 @@
-// 📁 App.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Bookshelf from './bookshelf';
+import html2pdf from 'html2pdf.js';
 
 export default function App() {
-  // toggles between character notes and matchup notes
   const [view, setView] = useState('characters');
-
-  // currently selected book (for notes view)
   const [selectedBook, setSelectedBook] = useState(null);
-
-  // notes for the selected book
-  const [notes, setNotes] = useState('');
-
-  // custom matchup books (saved in localStorage)
   const [customBooks, setCustomBooks] = useState(() => {
     const saved = localStorage.getItem('matchup-books');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // input state for new matchup book title
   const [newMatchup, setNewMatchup] = useState('');
-
-  // modal visibility state
   const [showModal, setShowModal] = useState(false);
-
-  // holds image file for new book
   const [newImageFile, setNewImageFile] = useState(null);
-
-  // holds book selected for deletion
   const [bookToDelete, setBookToDelete] = useState(null);
+  const [textColor, setTextColor] = useState('#e4e4e7');
 
-  // load notes when book is selected
+  const notesRef = useRef(null);
+
   useEffect(() => {
-    if (selectedBook) {
+    if (selectedBook && notesRef.current) {
       const saved = localStorage.getItem(`notes-${selectedBook.title}`);
-      setNotes(saved || '');
+      notesRef.current.innerHTML = saved || '';
     }
   }, [selectedBook]);
 
-  // save notes when they change
   useEffect(() => {
-    if (selectedBook) {
-      localStorage.setItem(`notes-${selectedBook.title}`, notes);
+    const handleInput = () => {
+      if (selectedBook && notesRef.current) {
+        const html = notesRef.current.innerHTML;
+        localStorage.setItem(`notes-${selectedBook.title}`, html);
+      }
+    };
+
+    const node = notesRef.current;
+    if (node) node.addEventListener('input', handleInput);
+    return () => {
+      if (node) node.removeEventListener('input', handleInput);
+    };
+  }, [selectedBook]);
+
+  const handleRichTyping = (e) => {
+    if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      const span = document.createElement("span");
+      span.style.color = textColor;
+      span.appendChild(document.createTextNode(e.key));
+      range.deleteContents();
+      range.insertNode(span);
+      range.setStartAfter(span);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      if (notesRef.current) {
+        notesRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const br = document.createElement("br");
+      const range = window.getSelection().getRangeAt(0);
+      range.insertNode(br);
+      range.setStartAfter(br);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+      if (notesRef.current) {
+        notesRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     }
-  }, [notes, selectedBook]);
+  };
 
-  // save matchup books list when it changes
-  useEffect(() => {
-    localStorage.setItem('matchup-books', JSON.stringify(customBooks));
-  }, [customBooks]);
+  const exportToPDF = () => {
+    if (notesRef.current && selectedBook) {
+      const opt = {
+        margin: 0.5,
+        filename: `${selectedBook.title.replace(/\s+/g, '_')}_notes.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().from(notesRef.current).set(opt).save();
+    }
+  };
 
-  // just picks a random color from a preset list
   const getRandomColor = () => {
     const colors = [
       '#f59e0b', '#10b981', '#3b82f6', '#ef4444',
@@ -60,10 +93,8 @@ export default function App() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  // adds a new matchup book
   const addMatchupBook = () => {
     if (!newMatchup.trim()) return;
-
     const title = newMatchup.trim();
     const reader = new FileReader();
 
@@ -73,14 +104,12 @@ export default function App() {
         image: reader.result || null,
         color: getRandomColor(),
       };
-
       setCustomBooks(prev => [...prev, newBook]);
       setNewMatchup('');
       setNewImageFile(null);
       setShowModal(false);
     };
 
-    // if there's an image, read it; otherwise just run
     if (newImageFile) {
       reader.readAsDataURL(newImageFile);
     } else {
@@ -88,7 +117,6 @@ export default function App() {
     }
   };
 
-  // deletes a book after confirmation
   const confirmDeleteBook = () => {
     if (bookToDelete) {
       setCustomBooks(prev => prev.filter(book => book.title !== bookToDelete.title));
@@ -99,12 +127,8 @@ export default function App() {
     setBookToDelete(null);
   };
 
-  // cancels delete action
-  const cancelDeleteBook = () => {
-    setBookToDelete(null);
-  };
+  const cancelDeleteBook = () => setBookToDelete(null);
 
-  // books to show based on view (no character books for now)
   const currentBooks =
     view === 'characters'
       ? []
@@ -115,7 +139,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* tab switcher */}
       <div className="tab-toggle">
         <button onClick={() => setView('characters')} className={view === 'characters' ? 'active' : ''}>Character Notes</button>
         <button onClick={() => setView('matchups')} className={view === 'matchups' ? 'active' : ''}>Player matchup</button>
@@ -124,7 +147,6 @@ export default function App() {
         )}
       </div>
 
-      {/* add matchup modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -147,7 +169,6 @@ export default function App() {
         </div>
       )}
 
-      {/* delete confirmation modal */}
       {bookToDelete && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -160,34 +181,43 @@ export default function App() {
         </div>
       )}
 
-      {/* main layout */}
       <div className="main-layout">
-        {/* bookshelf section */}
         <Bookshelf
-  books={currentBooks}
-  onSelectBook={setSelectedBook}
-  selectedBook={selectedBook}
-/>
+          books={currentBooks}
+          onSelectBook={setSelectedBook}
+          selectedBook={selectedBook}
+        />
 
-
-        {/* notes section */}
         {selectedBook && (
           <div className="notes-panel">
             <div className="notes-header">
               <h2>{selectedBook.title}</h2>
+              <div className="color-buttons">
+                <button onClick={() => setTextColor('#22d3ee')} style={{ background: '#22d3ee' }}>Cyan</button>
+                <button onClick={() => setTextColor('#f97316')} style={{ background: '#f97316' }}>Orange</button>
+                <button onClick={() => setTextColor('#84cc16')} style={{ background: '#84cc16' }}>Lime</button>
+                <button onClick={() => setTextColor('#a855f7')} style={{ background: '#a855f7' }}>Violet</button>
+                <button onClick={() => setTextColor('#ec4899')} style={{ background: '#ec4899' }}>Pink</button>
+                <button onClick={() => setTextColor('#e4e4e7')} style={{ background: '#e4e4e7', color: '#111' }}>White</button>
+              </div>
               {selectedBook.image && (
                 <img src={selectedBook.image} alt={selectedBook.title} className="character-thumb" />
               )}
             </div>
-            <textarea
-              placeholder="Write notes here..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            <div
+              className="rich-notes"
+              contentEditable
+              suppressContentEditableWarning
+              ref={notesRef}
+              onKeyDown={handleRichTyping}
+              style={{ color: textColor }}
+            ></div>
+            <div className="export-button">
+              <button onClick={exportToPDF}>Download PDF</button>
+            </div>
           </div>
         )}
 
-        {/* button to change page */}
         <div className="change-char-wrapper">
           <a href="https://www.fightercenter.net">
             <button className="change-char">
