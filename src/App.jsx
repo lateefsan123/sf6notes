@@ -3,18 +3,34 @@ import React, { useState, useEffect } from 'react';
 import Bookshelf from './bookshelf';
 
 export default function App() {
+  // toggles between character notes and matchup notes
   const [view, setView] = useState('characters');
+
+  // currently selected book (for notes view)
   const [selectedBook, setSelectedBook] = useState(null);
+
+  // notes for the selected book
   const [notes, setNotes] = useState('');
+
+  // custom matchup books (saved in localStorage)
   const [customBooks, setCustomBooks] = useState(() => {
     const saved = localStorage.getItem('matchup-books');
     return saved ? JSON.parse(saved) : [];
   });
+
+  // input state for new matchup book title
   const [newMatchup, setNewMatchup] = useState('');
+
+  // modal visibility state
   const [showModal, setShowModal] = useState(false);
+
+  // holds image file for new book
   const [newImageFile, setNewImageFile] = useState(null);
+
+  // holds book selected for deletion
   const [bookToDelete, setBookToDelete] = useState(null);
 
+  // load notes when book is selected
   useEffect(() => {
     if (selectedBook) {
       const saved = localStorage.getItem(`notes-${selectedBook.title}`);
@@ -22,16 +38,19 @@ export default function App() {
     }
   }, [selectedBook]);
 
+  // save notes when they change
   useEffect(() => {
     if (selectedBook) {
       localStorage.setItem(`notes-${selectedBook.title}`, notes);
     }
   }, [notes, selectedBook]);
 
+  // save matchup books list when it changes
   useEffect(() => {
     localStorage.setItem('matchup-books', JSON.stringify(customBooks));
   }, [customBooks]);
 
+  // just picks a random color from a preset list
   const getRandomColor = () => {
     const colors = [
       '#f59e0b', '#10b981', '#3b82f6', '#ef4444',
@@ -41,6 +60,7 @@ export default function App() {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
+  // adds a new matchup book
   const addMatchupBook = () => {
     if (!newMatchup.trim()) return;
 
@@ -60,6 +80,7 @@ export default function App() {
       setShowModal(false);
     };
 
+    // if there's an image, read it; otherwise just run
     if (newImageFile) {
       reader.readAsDataURL(newImageFile);
     } else {
@@ -67,6 +88,7 @@ export default function App() {
     }
   };
 
+  // deletes a book after confirmation
   const confirmDeleteBook = () => {
     if (bookToDelete) {
       setCustomBooks(prev => prev.filter(book => book.title !== bookToDelete.title));
@@ -77,20 +99,23 @@ export default function App() {
     setBookToDelete(null);
   };
 
+  // cancels delete action
   const cancelDeleteBook = () => {
     setBookToDelete(null);
   };
 
+  // books to show based on view (no character books for now)
   const currentBooks =
     view === 'characters'
       ? []
-      : customBooks.map((book, i) => ({
+      : customBooks.map((book) => ({
           ...book,
           onDelete: () => setBookToDelete(book)
         }));
 
   return (
     <div className="app">
+      {/* tab switcher */}
       <div className="tab-toggle">
         <button onClick={() => setView('characters')} className={view === 'characters' ? 'active' : ''}>Character Notes</button>
         <button onClick={() => setView('matchups')} className={view === 'matchups' ? 'active' : ''}>Player matchup</button>
@@ -99,6 +124,7 @@ export default function App() {
         )}
       </div>
 
+      {/* add matchup modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -113,7 +139,6 @@ export default function App() {
               accept="image/*"
               onChange={e => setNewImageFile(e.target.files?.[0])}
             />
-
             <div className="modal-actions">
               <button onClick={addMatchupBook}>Add</button>
               <button onClick={() => setShowModal(false)}>Cancel</button>
@@ -122,6 +147,7 @@ export default function App() {
         </div>
       )}
 
+      {/* delete confirmation modal */}
       {bookToDelete && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -134,9 +160,17 @@ export default function App() {
         </div>
       )}
 
+      {/* main layout */}
       <div className="main-layout">
-        <Bookshelf books={currentBooks} onSelectBook={setSelectedBook} />
+        {/* bookshelf section */}
+        <Bookshelf
+  books={currentBooks}
+  onSelectBook={setSelectedBook}
+  selectedBook={selectedBook}
+/>
 
+
+        {/* notes section */}
         {selectedBook && (
           <div className="notes-panel">
             <div className="notes-header">
@@ -153,10 +187,11 @@ export default function App() {
           </div>
         )}
 
+        {/* button to change page */}
         <div className="change-char-wrapper">
           <a href="https://www.fightercenter.net">
             <button className="change-char">
-              Change Character
+              Character Select
             </button>
           </a>
         </div>

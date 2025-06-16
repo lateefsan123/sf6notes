@@ -27,50 +27,50 @@ import terry from './covers/terry.png';
 import zangief from './covers/zangief.png';
 import improve from './covers/self-improvement-icon-sm.png';
 
-const defaultBooks = [
-  { title: 'Self improve', image: improve, color: '#3b82f6' },
-  { title: 'Aki Notes', image: aki, color: '#3b82f6' },
-  { title: 'Akuma Notes', image: akuma, color: '#10b981' },
-  { title: 'Blanka Notes', image: blanka, color: '#f59e0b' },
-  { title: 'Cammy Notes', image: cammy, color: '#ef4444' },
-  { title: 'Chun Li Notes', image: chunli, color: '#8b5cf6' },
-  { title: 'Dee Jay Notes', image: deejay, color: '#ec4899' },
-  { title: 'Dhalsim Notes', image: dhalsim, color: '#22d3ee' },
-  { title: 'E. Honda Notes', image: ehonda, color: '#f97316' },
-  { title: 'Ed Notes', image: ed, color: '#14b8a6' },
-  { title: 'Elena Notes', image: elena, color: '#6366f1' },
-  { title: 'Guile Notes', image: guile, color: '#84cc16' },
-  { title: 'Jamie Notes', image: jamie, color: '#eab308' },
-  { title: 'JP Notes', image: jp, color: '#db2777' },
-  { title: 'Juri Notes', image: juri, color: '#0ea5e9' },
-  { title: 'Ken Notes', image: ken, color: '#a855f7' },
-  { title: 'Kimberly Notes', image: kimberly, color: '#d946ef' },
-  { title: 'Lily Notes', image: lily, color: '#4ade80' },
-  { title: 'Luke Notes', image: luke, color: '#fde047' },
-  { title: 'M. Bison Notes', image: mbison, color: '#60a5fa' },
-  { title: 'Mai Notes', image: mai, color: '#f472b6' },
-  { title: 'Manon Notes', image: manon, color: '#f87171' },
-  { title: 'Marisa Notes', image: marisa, color: '#facc15' },
-  { title: 'Rashid Notes', image: rashid, color: '#2dd4bf' },
-  { title: 'Ryu Notes', image: ryu, color: '#3b82f6' },
-  { title: 'Terry Notes', image: terry, color: '#10b981' },
-  { title: 'Zangief Notes', image: zangief, color: '#f59e0b' },
-];
+function darkenColor(rgbString, percent) {
+  const [r, g, b] = rgbString.match(/\d+/g).map(Number);
+  const factor = 1 - percent;
 
-function darkenColor(hex, percent) {
-  const num = parseInt(hex.slice(1), 16);
-  let r = (num >> 16) - 255 * percent;
-  let g = ((num >> 8) & 0x00FF) - 255 * percent;
-  let b = (num & 0x0000FF) - 255 * percent;
-  r = Math.max(0, Math.min(255, r));
-  g = Math.max(0, Math.min(255, g));
-  b = Math.max(0, Math.min(255, b));
-  return `rgb(${r}, ${g}, ${b})`;
+  const darkR = Math.max(0, Math.round(r * factor));
+  const darkG = Math.max(0, Math.round(g * factor));
+  const darkB = Math.max(0, Math.round(b * factor));
+
+  return `rgb(${darkR}, ${darkG}, ${darkB})`;
 }
+
+const defaultBooks = [
+  { title: 'Self improve', image: improve, color: 'rgb(59, 130, 246)' },
+  { title: 'Aki Notes', image: aki, color: 'rgb(59, 130, 246)' },
+  { title: 'Akuma Notes', image: akuma, color: 'rgb(16, 185, 129)' },
+  { title: 'Blanka Notes', image: blanka, color: 'rgb(245, 158, 11)' },
+  { title: 'Cammy Notes', image: cammy, color: 'rgb(239, 68, 68)' },
+  { title: 'Chun Li Notes', image: chunli, color: 'rgb(139, 92, 246)' },
+  { title: 'Dee Jay Notes', image: deejay, color: 'rgb(236, 72, 153)' },
+  { title: 'Dhalsim Notes', image: dhalsim, color: 'rgb(34, 211, 238)' },
+  { title: 'E. Honda Notes', image: ehonda, color: 'rgb(249, 115, 22)' },
+  { title: 'Ed Notes', image: ed, color: 'rgb(20, 184, 166)' },
+  { title: 'Elena Notes', image: elena, color: 'rgb(99, 102, 241)' },
+  { title: 'Guile Notes', image: guile, color: 'rgb(132, 204, 22)' },
+  { title: 'Jamie Notes', image: jamie, color: 'rgb(234, 179, 8)' },
+  { title: 'JP Notes', image: jp, color: 'rgb(219, 39, 119)' },
+  { title: 'Juri Notes', image: juri, color: 'rgb(14, 165, 233)' },
+  { title: 'Ken Notes', image: ken, color: 'rgb(168, 85, 247)' },
+  { title: 'Kimberly Notes', image: kimberly, color: 'rgb(217, 70, 239)' },
+  { title: 'Lily Notes', image: lily, color: 'rgb(74, 222, 128)' },
+  { title: 'Luke Notes', image: luke, color: 'rgb(253, 224, 71)' },
+  { title: 'M. Bison Notes', image: mbison, color: 'rgb(96, 165, 250)' },
+  { title: 'Mai Notes', image: mai, color: 'rgb(244, 114, 182)' },
+  { title: 'Manon Notes', image: manon, color: 'rgb(248, 113, 113)' },
+  { title: 'Marisa Notes', image: marisa, color: 'rgb(250, 204, 21)' },
+  { title: 'Rashid Notes', image: rashid, color: 'rgb(45, 212, 191)' },
+  { title: 'Ryu Notes', image: ryu, color: 'rgb(59, 130, 246)' },
+  { title: 'Terry Notes', image: terry, color: 'rgb(16, 185, 129)' },
+  { title: 'Zangief Notes', image: zangief, color: 'rgb(245, 158, 11)' },
+];
 
 const ROW_SIZE = 8;
 
-export default function Bookshelf({ books, onSelectBook }) {
+export default function Bookshelf({ books, onSelectBook, selectedBook }) {
   books = books && books.length ? books : defaultBooks;
 
   const rows = [];
@@ -91,24 +91,31 @@ export default function Bookshelf({ books, onSelectBook }) {
         <div className="shelf-row" key={rowIndex}>
           {row.map((book, index) => {
             const bookIndex = rowIndex * ROW_SIZE + index;
-            const color = book.color || '#888';
+            const color = book.color || 'rgb(136, 136, 136)';
             const rotation = rotations[bookIndex];
             const rotationClass = `rotate-${rotation.toString().replace('-', '--')}`;
+            const isOpened = selectedBook?.title === book.title;
 
             return (
               <div
-                className={`book ${rotationClass}`}
+                id={`book-${book.title}`}
+                className={`book ${rotationClass} ${isOpened ? 'opened' : ''}`}
                 key={index}
-                onClick={() => onSelectBook({ ...book, color })}
-                style={{ backgroundColor: color, position: 'relative' }}
+                onClick={() => {
+                  onSelectBook({ ...book, color });
+                  setTimeout(() => {
+                    const el = document.getElementById(`book-${book.title}`);
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 0);
+                }}
+                style={{ backgroundColor: color, '--bookColor': color }}
+
               >
                 <div
                   className="book-image"
                   style={{ backgroundColor: darkenColor(color, 0.15) }}
                 >
-                  {book.image && (
-                    <img src={book.image} alt={book.title} />
-                  )}
+                  {book.image && <img src={book.image} alt={book.title} />}
                 </div>
                 <p>{book.title}</p>
 
