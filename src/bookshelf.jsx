@@ -76,7 +76,8 @@ const ROW_SIZE = 8; // how many books per row
 
 export default function Bookshelf({ books, onSelectBook, selectedBook }) {
   // if no custom books passed in, use the default character books
-  books = books && books.length ? books : [];
+  books = books && books.length ? books : defaultBooks;
+
 
 
   // break the book list into rows (so layout is grid-like)
