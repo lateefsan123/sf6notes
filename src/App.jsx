@@ -84,14 +84,25 @@ export default function App() {
     }
   };
 
-  const getRandomColor = () => {
-    const colors = [
-      '#f59e0b', '#10b981', '#3b82f6', '#ef4444',
-      '#8b5cf6', '#f43f5e', '#22c55e', '#0ea5e9',
-      '#eab308', '#ec4899', '#6366f1', '#f97316'
-    ];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
+const presetColors = [
+  'rgb(59, 130, 246)',   // blue
+  'rgb(16, 185, 129)',   // green
+  'rgb(245, 158, 11)',   // orange
+  'rgb(239, 68, 68)',    // red
+  'rgb(139, 92, 246)',   // violet
+  'rgb(236, 72, 153)',   // pink
+  'rgb(34, 211, 238)',   // cyan
+  'rgb(249, 115, 22)',   // orange deep
+  'rgb(20, 184, 166)',   // teal
+  'rgb(132, 204, 22)',   // lime
+  'rgb(168, 85, 247)',   // purple
+  'rgb(244, 114, 182)',  // rose
+];
+
+const getRandomColor = () => {
+  return presetColors[Math.floor(Math.random() * presetColors.length)];
+};
+
 
   const addMatchupBook = () => {
     if (!newMatchup.trim()) return;
