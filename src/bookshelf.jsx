@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+
+// importing all the cover images for the default books
 import aki from './covers/aki.png';
 import akuma from './covers/akuma.png';
 import blanka from './covers/blanka.png';
@@ -27,8 +29,9 @@ import terry from './covers/terry.png';
 import zangief from './covers/zangief.png';
 import improve from './covers/self-improvement-icon-sm.png';
 
+// function to darken the book color a bit for contrast (used on book spine)
 function darkenColor(rgbString, percent) {
-  const [r, g, b] = rgbString.match(/\d+/g).map(Number);
+  const [r, g, b] = rgbString.match(/\d+/g).map(Number); // split rgb string into numbers
   const factor = 1 - percent;
 
   const darkR = Math.max(0, Math.round(r * factor));
@@ -38,6 +41,7 @@ function darkenColor(rgbString, percent) {
   return `rgb(${darkR}, ${darkG}, ${darkB})`;
 }
 
+// list of all default books with their images and colors
 const defaultBooks = [
   { title: 'Self improve', image: improve, color: 'rgb(59, 130, 246)' },
   { title: 'Aki Notes', image: aki, color: 'rgb(59, 130, 246)' },
@@ -68,16 +72,20 @@ const defaultBooks = [
   { title: 'Zangief Notes', image: zangief, color: 'rgb(245, 158, 11)' },
 ];
 
-const ROW_SIZE = 8;
+const ROW_SIZE = 8; // how many books per row
 
 export default function Bookshelf({ books, onSelectBook, selectedBook }) {
-  books = books && books.length ? books : defaultBooks;
+  // if no custom books passed in, use the default character books
+  books = books && books.length ? books : [];
 
+
+  // break the book list into rows (so layout is grid-like)
   const rows = [];
   for (let i = 0; i < books.length; i += ROW_SIZE) {
     rows.push(books.slice(i, i + ROW_SIZE));
   }
 
+  // memoized array of random rotation values for each book so they look hand-placed
   const rotations = useMemo(() => (
     books.map(() => {
       const angles = [-5, -3, -2, 0, 2, 3, 5, 0, 0];
@@ -87,14 +95,16 @@ export default function Bookshelf({ books, onSelectBook, selectedBook }) {
 
   return (
     <div className="bookshelf" style={{ minHeight: '80vh', maxWidth: '800px', width: '100%' }}>
+      {/* go through each row of books */}
       {rows.map((row, rowIndex) => (
         <div className="shelf-row" key={rowIndex}>
+          {/* go through each book in the row */}
           {row.map((book, index) => {
             const bookIndex = rowIndex * ROW_SIZE + index;
-            const color = book.color || 'rgb(136, 136, 136)';
-            const rotation = rotations[bookIndex];
-            const rotationClass = `rotate-${rotation.toString().replace('-', '--')}`;
-            const isOpened = selectedBook?.title === book.title;
+            const color = book.color || 'rgb(136, 136, 136)'; // fallback color
+            const rotation = rotations[bookIndex]; // get that random rotation
+            const rotationClass = `rotate-${rotation.toString().replace('-', '--')}`; // convert to class name
+            const isOpened = selectedBook?.title === book.title; // is this book open?
 
             return (
               <div
@@ -102,15 +112,15 @@ export default function Bookshelf({ books, onSelectBook, selectedBook }) {
                 className={`book ${rotationClass} ${isOpened ? 'opened' : ''}`}
                 key={index}
                 onClick={() => {
-                  onSelectBook({ ...book, color });
+                  onSelectBook({ ...book, color }); // open this book
                   setTimeout(() => {
                     const el = document.getElementById(`book-${book.title}`);
-                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); // scroll to it
                   }, 0);
                 }}
                 style={{ backgroundColor: color, '--bookColor': color }}
-
               >
+                {/* book spine section */}
                 <div
                   className="book-image"
                   style={{ backgroundColor: darkenColor(color, 0.15) }}
@@ -119,12 +129,13 @@ export default function Bookshelf({ books, onSelectBook, selectedBook }) {
                 </div>
                 <p>{book.title}</p>
 
+                {/* if this is a custom book (has a delete button), show ✕ */}
                 {book.onDelete && (
                   <button
                     className="delete-book"
                     onClick={(e) => {
-                      e.stopPropagation();
-                      book.onDelete();
+                      e.stopPropagation(); // don't open the book
+                      book.onDelete(); // just trigger delete
                     }}
                   >
                     ✕

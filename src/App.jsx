@@ -165,12 +165,14 @@ export default function App() {
 
   // picks which set of books to show based on view
   const currentBooks =
-    view === 'characters'
-      ? []
-      : customBooks.map((book) => ({
+  view === 'characters'
+    ? []
+    : customBooks.length
+      ? customBooks.map((book) => ({
           ...book,
           onDelete: () => setBookToDelete(book)
-        }));
+        }))
+      : null; // pass null if no matchups added yet
 
   return (
     <div className="app">
