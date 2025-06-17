@@ -29,9 +29,21 @@ import terry from './covers/terry.png';
 import zangief from './covers/zangief.png';
 import improve from './covers/self-improvement-icon-sm.png';
 
-// function to darken the book color a bit for contrast (used on book spine)
-function darkenColor(rgbString, percent) {
-  const [r, g, b] = rgbString.match(/\d+/g).map(Number); // split rgb string into numbers
+// function to darken the book color a bit for contrast (used on book center)export function darkenColor(color, percent) {
+export function darkenColor(color, percent) {
+  let r, g, b;
+
+  if (color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  } else if (color.startsWith('rgb')) {
+    [r, g, b] = color.match(/\d+/g).map(Number);
+  } else {
+    throw new Error('Unsupported color format');
+  }
+
   const factor = 1 - percent;
 
   const darkR = Math.max(0, Math.round(r * factor));
@@ -41,7 +53,8 @@ function darkenColor(rgbString, percent) {
   return `rgb(${darkR}, ${darkG}, ${darkB})`;
 }
 
-// list of all default books with their images and colors
+
+// characater books with their images and colors
 const defaultBooks = [
   { title: 'Self improve', image: improve, color: 'rgb(59, 130, 246)' },
   { title: 'Aki Notes', image: aki, color: 'rgb(59, 130, 246)' },
@@ -86,7 +99,7 @@ export default function Bookshelf({ books, onSelectBook, selectedBook }) {
     rows.push(books.slice(i, i + ROW_SIZE));
   }
 
-  // memoized array of random rotation values for each book so they look hand-placed
+  // memoized array of random rotation values, i just think this looks cool since the books now look like they were handplaced.
   const rotations = useMemo(() => (
     books.map(() => {
       const angles = [-5, -3, -2, 0, 2, 3, 5, 0, 0];
@@ -119,9 +132,11 @@ export default function Bookshelf({ books, onSelectBook, selectedBook }) {
                     el?.scrollIntoView({ behavior: 'smooth', block: 'center' }); // scroll to it
                   }, 0);
                 }}
+
+                
                 style={{ backgroundColor: color, '--bookColor': color }}
               >
-                {/* book spine section */}
+                {/* book center section */}
                 <div
                   className="book-image"
                   style={{ backgroundColor: darkenColor(color, 0.15) }}
@@ -130,13 +145,13 @@ export default function Bookshelf({ books, onSelectBook, selectedBook }) {
                 </div>
                 <p>{book.title}</p>
 
-                {/* if this is a custom book (has a delete button), show ✕ */}
+                {/* custom book delete button)*/}
                 {book.onDelete && (
                   <button
                     className="delete-book"
                     onClick={(e) => {
-                      e.stopPropagation(); // don't open the book
-                      book.onDelete(); // just trigger delete
+                      e.stopPropagation(); //prevents book from opening on click
+                      book.onDelete(); 
                     }}
                   >
                     ✕

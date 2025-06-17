@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Bookshelf from './bookshelf';
 import html2pdf from 'html2pdf.js';
+import {darkenColor} from './bookshelf';
 
 export default function App() {
   // what section we're on (character notes or matchup notes)
@@ -163,6 +164,9 @@ export default function App() {
     return presetColors[Math.floor(Math.random() * presetColors.length)];
   };
 
+  const [newColor, setNewColor] = useState("#ffffff");
+
+
   // adds a new matchup book
   const addMatchupBook = () => {
     if (!newMatchup.trim()) return;
@@ -173,7 +177,8 @@ export default function App() {
       const newBook = {
         title,
         image: reader.result || null,
-        color: getRandomColor(),
+        color: newColor,
+        innercolor: darkenColor(newColor, 0.15),
       };
       setCustomBooks(prev => [...prev, newBook]);
       setNewMatchup('');
@@ -271,28 +276,60 @@ export default function App() {
 </div>
 
 
-      {/* popup to add a matchup book */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <input
-              type="text"
-              placeholder="(e.g. Lateef's kim)"
-              value={newMatchup}
-              onChange={e => setNewMatchup(e.target.value)}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={e => setNewImageFile(e.target.files?.[0])}
-            />
-            <div className="modal-actions">
-              <button onClick={addMatchupBook}>Add</button>
-              <button onClick={() => setShowModal(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+{/* popup to add a matchup book */}
+{showModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <input
+        type="text"
+        placeholder="(e.g. Lateef's kim)"
+        value={newMatchup}
+        onChange={e => setNewMatchup(e.target.value)}
+      />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={e => setNewImageFile(e.target.files?.[0])}
+      />
+
+      {/* Color Picker Input */}
+     <div style={{
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  background: '#f4f4f6',
+  borderRadius: '10px',
+  padding: '10px 15px',
+  margin: '15px 0',
+}}>
+  <label style={{ color: '#333', fontWeight: '600', fontSize: '14px' }}>
+    Pick Book Color:
+  </label>
+  <input
+    type="color"
+    value={newColor}
+    onChange={(e) => setNewColor(e.target.value)}
+    style={{
+      width: '50px',
+      height: '35px',
+      border: 'none',
+      cursor: 'pointer',
+      background: 'none',
+      outline: 'none',
+    }}
+  />
+</div>
+
+
+
+      <div className="modal-actions">
+        <button onClick={addMatchupBook}>Add</button>
+        <button onClick={() => setShowModal(false)}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* delete confirmation popup */}
       {bookToDelete && (
