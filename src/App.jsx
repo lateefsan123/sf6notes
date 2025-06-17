@@ -7,6 +7,9 @@ export default function App() {
   // what section we're on (character notes or matchup notes)
   const [view, setView] = useState('characters');
 
+  const [showMobileNotes, setShowMobileNotes] = useState(false);
+
+
   // which book is open right now
   const [selectedBook, setSelectedBook] = useState(null);
 
@@ -126,7 +129,7 @@ export default function App() {
     link.click();
   };
 
-  // also new — import a backup file and restore your stuff
+  //import a backup file and restore your stuff on different devices
   const importAllNotes = (file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -353,34 +356,48 @@ export default function App() {
         />
 
         {selectedBook && (
-          <div className="notes-panel">
-            <div className="notes-header">
-              <h2>{selectedBook.title}</h2>
-              <div className="color-buttons">
-                <button onClick={() => setTextColor('#22d3ee')} style={{ background: '#22d3ee' }}>Cyan</button>
-                <button onClick={() => setTextColor('#f97316')} style={{ background: '#f97316' }}>Orange</button>
-                <button onClick={() => setTextColor('#84cc16')} style={{ background: '#84cc16' }}>Lime</button>
-                <button onClick={() => setTextColor('#a855f7')} style={{ background: '#a855f7' }}>Violet</button>
-                <button onClick={() => setTextColor('#ec4899')} style={{ background: '#ec4899' }}>Pink</button>
-                <button onClick={() => setTextColor('#e4e4e7')} style={{ background: '#e4e4e7', color: '#111' }}>White</button>
-              </div>
-              {selectedBook.image && (
-                <img src={selectedBook.image} alt={selectedBook.title} className="character-thumb" />
-              )}
-            </div>
-            <div
-              className="rich-notes"
-              contentEditable
-              suppressContentEditableWarning
-              ref={notesRef}
-              onKeyDown={handleRichTyping}
-              style={{ color: textColor }}
-            ></div>
-            <div className="export-button">
-              <button onClick={exportToPDF}>Download PDF</button>
-            </div>
-          </div>
-        )}
+  <div className={`notes-panel ${showMobileNotes ? 'open' : ''}`}>
+    <div className="notes-header">
+      <h2>{selectedBook.title}</h2>
+      <div className="color-buttons">
+        <button onClick={() => setTextColor('#22d3ee')} style={{ background: '#22d3ee' }}>Cyan</button>
+        <button onClick={() => setTextColor('#f97316')} style={{ background: '#f97316' }}>Orange</button>
+        <button onClick={() => setTextColor('#84cc16')} style={{ background: '#84cc16' }}>Lime</button>
+        <button onClick={() => setTextColor('#a855f7')} style={{ background: '#a855f7' }}>Violet</button>
+        <button onClick={() => setTextColor('#ec4899')} style={{ background: '#ec4899' }}>Pink</button>
+        <button onClick={() => setTextColor('#e4e4e7')} style={{ background: '#e4e4e7', color: '#111' }}>White</button>
+      </div>
+      {selectedBook.image && (
+        <img src={selectedBook.image} alt={selectedBook.title} className="character-thumb" />
+      )}
+    </div>
+    <div
+      className="rich-notes"
+      contentEditable
+      suppressContentEditableWarning
+      ref={notesRef}
+      onKeyDown={handleRichTyping}
+      style={{ color: textColor }}
+    ></div>
+    <div className="export-button">
+      <button onClick={exportToPDF} className='download-pdf'>Download PDF</button>
+      <button className="close-notes-btn" onClick={() => setShowMobileNotes(false)}>
+      Close
+    </button>
+    </div>
+
+    {/* Mobile-only close button */}
+    
+  </div>
+)}
+
+{selectedBook && (
+  <button className="mobile-notes-toggle" onClick={() => setShowMobileNotes(true)}>
+    Open Notes
+  </button>
+)}
+
+
 
         <div className="change-char-wrapper">
           <a href="https://www.fightercenter.net">
