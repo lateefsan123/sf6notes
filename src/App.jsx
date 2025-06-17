@@ -103,20 +103,60 @@ export default function App() {
     }
   };
 
-  // some preset colors for new matchup books to randomly use
+  // this is new — export ALL notes as one .json file
+  const exportAllNotes = () => {
+    const data = {
+      books: customBooks,
+      notes: {},
+    };
+
+    customBooks.forEach(book => {
+      const noteKey = `notes-${book.title}`;
+      const savedNote = localStorage.getItem(noteKey);
+      if (savedNote) {
+        data.notes[book.title] = savedNote;
+      }
+    });
+
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'sf6_notes_backup.json';
+    link.click();
+  };
+
+  // also new — import a backup file and restore your stuff
+  const importAllNotes = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+
+        if (importedData.books && Array.isArray(importedData.books)) {
+          setCustomBooks(importedData.books);
+          localStorage.setItem('matchup-books', JSON.stringify(importedData.books));
+        }
+
+        if (importedData.notes) {
+          for (const [title, html] of Object.entries(importedData.notes)) {
+            localStorage.setItem(`notes-${title}`, html);
+          }
+        }
+
+        alert('Notes imported successfully!');
+      } catch (err) {
+        alert('Failed to import notes. Make sure it\'s a valid file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // colors we cycle through randomly when creating books
   const presetColors = [
-    'rgb(59, 130, 246)',   // blue
-    'rgb(16, 185, 129)',   // green
-    'rgb(245, 158, 11)',   // orange
-    'rgb(239, 68, 68)',    // red
-    'rgb(139, 92, 246)',   // violet
-    'rgb(236, 72, 153)',   // pink
-    'rgb(34, 211, 238)',   // cyan
-    'rgb(249, 115, 22)',   // orange deep
-    'rgb(20, 184, 166)',   // teal
-    'rgb(132, 204, 22)',   // lime
-    'rgb(168, 85, 247)',   // purple
-    'rgb(244, 114, 182)',  // rose
+    'rgb(59, 130, 246)', 'rgb(16, 185, 129)', 'rgb(245, 158, 11)',
+    'rgb(239, 68, 68)', 'rgb(139, 92, 246)', 'rgb(236, 72, 153)',
+    'rgb(34, 211, 238)', 'rgb(249, 115, 22)', 'rgb(20, 184, 166)',
+    'rgb(132, 204, 22)', 'rgb(168, 85, 247)', 'rgb(244, 114, 182)',
   ];
 
   const getRandomColor = () => {
@@ -129,50 +169,47 @@ export default function App() {
     const title = newMatchup.trim();
     const reader = new FileReader();
 
-    // once image is loaded (or skipped), create the new book object
     reader.onloadend = () => {
       const newBook = {
         title,
         image: reader.result || null,
         color: getRandomColor(),
       };
-      setCustomBooks(prev => [...prev, newBook]); // add it to the array
+      setCustomBooks(prev => [...prev, newBook]);
       setNewMatchup('');
       setNewImageFile(null);
       setShowModal(false);
     };
 
     if (newImageFile) {
-      reader.readAsDataURL(newImageFile); // load the image
+      reader.readAsDataURL(newImageFile);
     } else {
-      reader.onloadend(); // just call it with no image
+      reader.onloadend();
     }
   };
 
-  // deletes a book
   const confirmDeleteBook = () => {
     if (bookToDelete) {
       setCustomBooks(prev => prev.filter(book => book.title !== bookToDelete.title));
       if (selectedBook?.title === bookToDelete.title) {
-        setSelectedBook(null); // close it if it was open
+        setSelectedBook(null);
       }
     }
     setBookToDelete(null);
   };
 
-  // just cancel deletion
   const cancelDeleteBook = () => setBookToDelete(null);
 
-  // picks which set of books to show based on view
+  // picks which books to display based on current tab
   const currentBooks =
-  view === 'characters'
-    ? []
-    : customBooks.length
-      ? customBooks.map((book) => ({
-          ...book,
-          onDelete: () => setBookToDelete(book)
-        }))
-      : null; // pass null if no matchups added yet
+    view === 'characters'
+      ? null // fall back to default books for character notes
+      : customBooks.length
+        ? customBooks.map((book) => ({
+            ...book,
+            onDelete: () => setBookToDelete(book)
+          }))
+        : []; // show empty shelf when no matchups
 
   return (
     <div className="app">
@@ -184,6 +221,55 @@ export default function App() {
           <button onClick={() => setShowModal(true)} className="open-modal">+ Add Matchup</button>
         )}
       </div>
+
+      
+        {/* import/export buttons */}
+<div className="import-export" style={{ marginTop: '1rem', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+  <button
+    onClick={exportAllNotes}
+    style={{
+      background: '#1e40af',
+      color: 'white',
+      border: 'none',
+      padding: '8px 16px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: '500',
+      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)'
+    }}
+  >
+    Export Notes
+  </button>
+
+  {/* hidden file input, triggered by import button */}
+  <input
+    id="import-notes-file"
+    type="file"
+    accept="application/json"
+    style={{ display: 'none' }}
+    onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (file) importAllNotes(file);
+    }}
+  />
+
+  <button
+    onClick={() => document.getElementById('import-notes-file').click()}
+    style={{
+      background: '#059669',
+      color: 'white',
+      border: 'none',
+      padding: '8px 16px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: '500',
+      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)'
+    }}
+  >
+    Import Notes
+  </button>
+</div>
+
 
       {/* popup to add a matchup book */}
       {showModal && (
@@ -221,21 +307,19 @@ export default function App() {
         </div>
       )}
 
+      {/* layout container */}
       <div className="main-layout">
-        {/* bookshelf grid */}
         <Bookshelf
           books={currentBooks}
           onSelectBook={setSelectedBook}
           selectedBook={selectedBook}
         />
 
-        {/* notes section */}
         {selectedBook && (
           <div className="notes-panel">
             <div className="notes-header">
               <h2>{selectedBook.title}</h2>
               <div className="color-buttons">
-                {/* change text color buttons */}
                 <button onClick={() => setTextColor('#22d3ee')} style={{ background: '#22d3ee' }}>Cyan</button>
                 <button onClick={() => setTextColor('#f97316')} style={{ background: '#f97316' }}>Orange</button>
                 <button onClick={() => setTextColor('#84cc16')} style={{ background: '#84cc16' }}>Lime</button>
@@ -243,7 +327,6 @@ export default function App() {
                 <button onClick={() => setTextColor('#ec4899')} style={{ background: '#ec4899' }}>Pink</button>
                 <button onClick={() => setTextColor('#e4e4e7')} style={{ background: '#e4e4e7', color: '#111' }}>White</button>
               </div>
-              {/* optional image of book */}
               {selectedBook.image && (
                 <img src={selectedBook.image} alt={selectedBook.title} className="character-thumb" />
               )}
@@ -262,7 +345,6 @@ export default function App() {
           </div>
         )}
 
-        {/* button to go back to the main site */}
         <div className="change-char-wrapper">
           <a href="https://www.fightercenter.net">
             <button className="change-char">
