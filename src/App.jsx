@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import Bookshelf from './bookshelf';
 import html2pdf from 'html2pdf.js';
 import {darkenColor} from './bookshelf';
+import punk from './covers/ppunk.png';
+import tokido from './covers/tokido.png';
+import leshar from './covers/leshar.png';
 
 export default function App() {
   // what section we're on (character notes or matchup notes)
@@ -14,11 +17,49 @@ export default function App() {
   const [selectedBook, setSelectedBook] = useState(null);
 
   // custom matchup books, grab from localStorage if it's already there
-  const [customBooks, setCustomBooks] = useState(() => {
-    const saved = localStorage.getItem('matchup-books');
-    return saved ? JSON.parse(saved) : [];
-  });
+const [customBooks, setCustomBooks] = useState(() => {
+  const saved = localStorage.getItem('matchup-books');
+  const parsed = saved ? JSON.parse(saved) : null;
 
+  if (parsed && parsed.length > 0) return parsed;
+
+  const defaultBooks = [
+    {
+      title: "Punk",
+      image: punk,
+      color: "rgb(19, 97, 38)",
+      innercolor: darkenColor("rgb(19, 97, 38)", 0.15),
+    },
+    {
+      title: "Tokido",
+      image: tokido,
+      color: "rgb(43, 43, 43)",
+      innercolor: darkenColor("rgb(43, 43, 43)", 0.15),
+    },
+    {
+      title: "Leshar",
+      image: leshar,
+      color: "rgb(68, 117, 239)",
+      innercolor: darkenColor("rgb(68, 117, 239)", 0.15),
+    },
+  ];
+
+  // Save to localStorage
+  localStorage.setItem('matchup-books', JSON.stringify(defaultBooks));
+
+  // Set default notes for each book
+  const defaultNotes = {
+    "Punk": "<p>Do not whiff  Buttons against him </p>",
+    "Tokido": "<p>Do not forget to Breath</p>",
+    "Leshar": "<p>Offense Do not Try to hit him with DI</p>",
+  };
+
+  for (const [title, html] of Object.entries(defaultNotes)) {
+    localStorage.setItem(`notes-${title}`, html);
+  }
+
+  return defaultBooks;
+});
   // input field stuff for adding new matchups
   const [newMatchup, setNewMatchup] = useState('');
   const [showModal, setShowModal] = useState(false);
