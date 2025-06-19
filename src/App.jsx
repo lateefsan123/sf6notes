@@ -5,8 +5,48 @@ import {darkenColor} from './bookshelf';
 import punk from './covers/ppunk.png';
 import tokido from './covers/tokido.png';
 import leshar from './covers/leshar.png';
+import { div } from 'framer-motion/client';
+import { use } from 'framer-motion/m';
 
 export default function App() {
+  // color picker for notes
+  const [noteColor, setNoteColor] = useState(null);
+
+const [noteModalColor, setNoteModalColor] = useState(
+  localStorage.getItem("notes-panel-color") || "rgba(28, 24, 48, 0.85)"
+);
+
+const [richnotes, setRichNotes] = useState(
+  localStorage.getItem("rich-notes-color") || "rgba(28, 26, 45, 0.65)"
+);
+
+
+
+  function handleColorChange(color, rich) {
+    +setNoteModalColor(color);
+    setRichNotes(rich);
+
+    localStorage.setItem("notes-panel-color", color);
+    localStorage.setItem("rich-notes-color", rich);
+
+    const panel = document.querySelector(".notes-panel");
+    const richArea = document.querySelector(".rich-notes");
+
+    if (panel) panel.style.backgroundColor = color;
+    if (richArea) richArea.style.backgroundColor = rich;
+    
+  }
+
+  useEffect(() => {
+  const panel = document.querySelector(".notes-panel");
+  const richArea = document.querySelector(".rich-notes");
+
+  if (panel) panel.style.backgroundColor = noteModalColor;
+  if (richArea) richArea.style.backgroundColor = richnotes;
+}, [noteModalColor, richnotes]);
+
+
+
   // what section we're on (character notes or matchup notes)
   const [view, setView] = useState('characters');
 
@@ -261,6 +301,8 @@ const [customBooks, setCustomBooks] = useState(() => {
         : []; // show empty shelf when no matchups
 
   return (
+
+    
     <div className="app">
       {/* top buttons to switch views */}
       <div className="tab-toggle">
@@ -318,6 +360,105 @@ const [customBooks, setCustomBooks] = useState(() => {
     Import Notes
   </button>
 </div>
+
+{showMobileNotes && (
+  <div className="colorpickerback">
+    <div className="color-picker">
+
+      <div className="colorpickerclose">
+        <button onClick={() => setShowMobileNotes(!showMobileNotes)}>
+          <i className="fa-solid fa-x fa-lg"></i>
+        </button>
+      </div>
+
+      <div className="colorholder">
+        {/* Default color - deep indigo */}
+        <button
+          data-inner="rgba(28, 26, 45, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(28, 24, 48, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(28, 24, 48, 0.85)" }}></i>
+        </button>
+
+        {/* Deep Burgundy */}
+        <button
+          data-inner="rgba(65, 21, 21, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(88, 28, 28, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(88, 28, 28, 0.85)" }}></i>
+        </button>
+
+        {/* Muted Crimson */}
+        <button
+          data-inner="rgba(94, 22, 30, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(132, 32, 41, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(132, 32, 41, 0.85)" }}></i>
+        </button>
+
+        {/* Deep Plum */}
+        <button
+          data-inner="rgba(55, 25, 58, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(75, 36, 78, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(75, 36, 78, 0.85)" }}></i>
+        </button>
+
+        {/* Royal Purple */}
+        <button
+          data-inner="rgba(75, 38, 112, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(102, 51, 153, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(102, 51, 153, 0.85)" }}></i>
+        </button>
+
+        {/* Navy Blue */}
+        <button
+          data-inner="rgba(18, 29, 66, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(23, 37, 84, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(23, 37, 84, 0.85)" }}></i>
+        </button>
+
+        {/* Deep Teal */}
+        <button
+          data-inner="rgba(10, 42, 48, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(15, 58, 66, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(15, 58, 66, 0.85)" }}></i>
+        </button>
+
+        {/* Elegant Olive */}
+        <button
+          data-inner="rgba(54, 51, 36, 0.65)"
+          onClick={(e) =>
+            handleColorChange("rgba(72, 69, 49, 0.85)", e.currentTarget.dataset.inner)
+          }
+        >
+          <i className="fa-solid fa-droplet fa-xl" style={{ color: "rgba(72, 69, 49, 0.85)" }}></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+
+
 
 
 {/* popup to add a matchup book */}
@@ -397,7 +538,7 @@ const [customBooks, setCustomBooks] = useState(() => {
         />
 
         {selectedBook && (
-  <div className={`notes-panel ${showMobileNotes ? 'open' : ''}`}>
+  <div className={`notes-panel ${showMobileNotes ? 'open' : ''}`} style={{ backgroundColor: noteModalColor }}>
     <div className="notes-header">
       <h2>{selectedBook.title}</h2>
       <div className="color-buttons">
@@ -418,18 +559,25 @@ const [customBooks, setCustomBooks] = useState(() => {
       suppressContentEditableWarning
       ref={notesRef}
       onKeyDown={handleRichTyping}
-      style={{ color: textColor }}
+      style={{ color: textColor, backgroundColor: richnotes
+       }}
     ></div>
     <div className="export-button">
       <button onClick={exportToPDF} className='download-pdf'>Download PDF</button>
+      <button onClick={() => setShowMobileNotes(!showMobileNotes)}><i class="fa-solid fa-droplet fa-xl"></i></button>
       <button className="close-notes-btn" onClick={() => setShowMobileNotes(false)}>
       Close
     </button>
     </div>
 
     {/* Mobile-only close button */}
-    
+  
+
+
+  
   </div>
+
+  
 )}
 
 {selectedBook && (
