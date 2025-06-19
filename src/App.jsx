@@ -7,6 +7,7 @@ import tokido from './covers/tokido.png';
 import leshar from './covers/leshar.png';
 import { div } from 'framer-motion/client';
 import { use } from 'framer-motion/m';
+import { height } from '@fortawesome/free-solid-svg-icons/fa0';
 
 export default function App() {
   // color picker for notes
@@ -564,7 +565,7 @@ const [customBooks, setCustomBooks] = useState(() => {
     ></div>
     <div className="export-button">
       <button onClick={exportToPDF} className='download-pdf'>Download PDF</button>
-      <button onClick={() => setShowMobileNotes(!showMobileNotes)}><i class="fa-solid fa-droplet fa-xl"></i></button>
+      <button onClick={() => setShowMobileNotes(!showMobileNotes)} style={{height: "auto"}}><i class="fa-solid fa-droplet fa-sm"></i></button>
       <button className="close-notes-btn" onClick={() => setShowMobileNotes(false)}>
       Close
     </button>
